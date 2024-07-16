@@ -43,6 +43,7 @@ async function run() {
 
       bcrypt.hash(pin, saltRounds, function (err, hash) {
         // Store hash in your password DB.
+        console.log(hash);
       });
 
       res.send({ message: "registered" });
