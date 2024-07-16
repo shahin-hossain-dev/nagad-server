@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const bcrypt = require("bcrypt");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const app = express();
@@ -31,6 +32,21 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    //
+
+    // user create
+    app.post("/register", async (req, res) => {
+      const user = req.body;
+      const saltRounds = 10;
+      const pin = user.pin;
+
+      bcrypt.hash(pin, saltRounds, function (err, hash) {
+        // Store hash in your password DB.
+      });
+
+      res.send({ message: "registered" });
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
