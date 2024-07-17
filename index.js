@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const app = express();
@@ -33,7 +34,10 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    //
+    //database
+    const usersCollection = client.db("nagad-islamic").collection("users");
+
+    // jwt token
 
     // user create
     app.post("/register", async (req, res) => {
@@ -41,12 +45,24 @@ async function run() {
       const saltRounds = 10;
       const pin = user.pin;
 
-      bcrypt.hash(pin, saltRounds, function (err, hash) {
-        // Store hash in your password DB.
-        console.log(hash);
+      bcrypt.hash(pin, saltRounds, async (err, hash) => {
+        // Store hash in  DB.
+        const doc = {
+          name: user.name,
+          email: user.email,
+          pin: hash,
+          number: user.number,
+          status: "pending",
+          acType: user.acType,
+        };
+        const result = await usersCollection.insertOne(doc);
+        res.send(result);
       });
-
-      res.send({ message: "registered" });
+    });
+    // get users
+    app.get("/users", async (req, res) => {
+      const users = await usersCollection.find().toArray();
+      res.send(users);
     });
 
     // Send a ping to confirm a successful connection
